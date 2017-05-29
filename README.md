@@ -1,3 +1,7 @@
+# SENIOR PROJECT FINAL CODE
+
+#### TOPIC: DEPRESSION ASSESSMENT TOOL
+
 This is the final code for the senior project
 
 Steps to use the code:
