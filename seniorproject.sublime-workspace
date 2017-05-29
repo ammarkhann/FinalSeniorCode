@@ -228,7 +228,10 @@
 	"buffers":
 	[
 		{
+			"contents": "{% for alternative in alter %}\n <p>Transcrti</p>\n\n\t{{ alternative.transcript }}\n\n\n\t<p>Confidence</p>\n\t{{ alternative.confidence }}\n\n{% endfor %}",
 			"file": "src/templates/dashboard/long_audio.html",
+			"file_size": 144,
+			"file_write_time": 131381642620000000,
 			"settings":
 			{
 				"buffer_size": 144,
@@ -245,16 +248,22 @@
 			}
 		},
 		{
+			"contents": "from django.conf import settings\nfrom django.core.mail import send_mail\nfrom django.shortcuts import render\nfrom django.contrib import messages\nfrom google.cloud import speech\n\nfrom newsletter.forms import ContactForm, SignUpForm\nfrom newsletter.models import SignUp\nfrom django.shortcuts import render, get_object_or_404,redirect\nfrom questions.models import Question,UserAnswer,UserTextAnswer, UserAudioAnswer\nimport speech_recognition as sr\nimport io\nimport os\nimport time\nfrom questions.models import Question\n\n\t\t\n\n# Create your views here.\ndef home(request):\n\t\n\tif request.user.is_authenticated():\n\n\t\tqueryset = Question.objects.all().order_by('-timestamp')\n\n\t\tnew_user = False\n\t\n\t\tcontext = {\n\t\t\t\"new_user\": new_user,\n\t\t\t\"question\": queryset[0],\n\t\t}\n\n\n\t\t\n\t\treturn render(request, \"dashboard/home.html\", context)\n\n\tcontext = {\n\t\t\n\t}\n\n\n\treturn render(request, \"home.html\", context)\n\n\ndef test(request):\n\n\turi = 'gs://12depressionassessment34/test123.flac'\n\t\n\tpath = \"/Users/ammarkhan/Downloads/sentiment-analysis-921a452139e2.json\"\n\t# r = sr.Recognizer()\n\t# r.pause_threshold=5\n\t# r.phrase_threshold = 0.3\n\t# with sr.Microphone() as source:\n\t# \tprint(\"Say something!\")\n\t# \tprint(r.pause_threshold)\n\t# \taudio = r.listen(source)\n\n\tfile_name = \"test123\"\n\tpath = settings.MEDIA_ROOT+\"/\"+request.user.username\n\tfull_path = os.path.join(path, file_name)\n\tprint(\"The file name is %s and the path is %s where the full path is %s\" %(file_name,path,full_path)) \n\t# if not os.path.exists(path):\n\t# \tos.makedirs(path)\n\n\t# with open(full_path+\".flac\",\"wb\") as f:\n\t# \tf.write(audio.get_flac_data())\n\n\t# print(\"audio file saved\")\n\talter = transcribe_gcs(uri)\n\n\n\n\n\t# AUDIO_FILE_TR = os.path.join(settings.MEDIA_ROOT+\"/\"+request.user.username, \"test123.flac\")\n\t# print AUDIO_FILE_TR\n\t# r = sr.Recognizer()\n\t# with sr.AudioFile(filepath) as source:\n\t# \tprint(\"about to read the file\")\n\t# \tprint(source)\n\t# \taudio_tr = r.record(source)\n\n\t# print(\"reading done\")\n\t# print(audio_tr)\n\n\treturn render(request,\"dashboard/long_audio.html\", context={\"alter\": alter,})\n\n\ndef result(request):\n\tqueryset = Question.objects.get_unanswered(request.user).order_by('-timestamp')\t\n\n\tif queryset.count() == 0:\n\t\tmultiple_choice_score = 0\n\t\ttext_score = 0\n\t\taudio_score = 0\n\n\t\tuser_answer = UserAnswer.objects.filter(user=request.user)\n\t\tuser_text_answer = UserTextAnswer.objects.filter(user=request.user)\n\t\tuser_audio_answer = UserAudioAnswer.objects.filter(user=request.user)\n\t\tprint user_text_answer\n\n\t\tfor obj in user_answer:\n\t\t\tmultiple_choice_score += obj.my_points\n\n\t\tfor obj in user_text_answer:\n\t\t\ttext_score += obj.my_points\n\n\t\tfor obj in user_audio_answer:\n\t\t\taudio_score += obj.my_points\n\n\t\ttemp_user_score = (multiple_choice_score + text_score + audio_score)/ (user_answer.count() + user_text_answer.count()+ user_audio_answer.count())\n\t\tprint temp_user_score\n\n\t\t\n\telse:\n\t\tprint messages.error(request, 'Please answer all the questions first.')\n\t\treturn redirect(\"home\")\n\n\tcontext = {\n\n\t\"temp_user_score\": temp_user_score,\n\t}\n\n\n\n\treturn render(request,\"dashboard/result.html\", context)\n\n\n\n\n\ndef transcribe_gcs(gcs_uri):\n    \"\"\"Asynchronously transcribes the audio file specified by the gcs_uri.\"\"\"\n    print(\"Executing gcs method\")\n    from google.cloud import speech\n    speech_client = speech.Client()\n\n    audio_sample = speech_client.sample(\n        content=None,\n        source_uri=gcs_uri,\n        encoding='FLAC',\n        sample_rate_hertz=16000)\n\n    operation = audio_sample.long_running_recognize('tr-TR')\n    print(\"checkpoint2\")\n    retry_count = 100\n    while retry_count > 0 and not operation.complete:\n        retry_count -= 1\n        time.sleep(2)\n        operation.poll()\n\n\n    print(\"checkpoint3\")\n\n    if not operation.complete:\n        print('Operation not complete and retry limit reached.')\n        return\n\n    print(\"checkpoint 4\")\n\n    alternatives = operation.results\n\n    return alternatives\n\n    # for alternative in alternatives:\n    #     print('Transcript: {}'.format(alternative.transcript))\n    #     print('Confidence: {}'.format(alternative.confidence))\n    # [END send_request_gcs]\n\n\ndef user_agreement(request):\n\treturn render(request,\"dashboard/user-agreement.html\", context={})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
 			"file": "src/dashboard/views.py",
+			"file_size": 4217,
+			"file_write_time": 131405254290000000,
 			"settings":
 			{
-				"buffer_size": 3752,
+				"buffer_size": 4217,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
+			"contents": "{% extends \"base.html\" %}\n{% load staticfiles %}\n\n\n\n\n\n\n\n\n\n\n\n{% block content %}\n\n\n     <!-- Head Section -->\n            <section class=\"home-section bg-light-alfa-30 parallax-2 fixed-height-small\" data-background=\"{% static 'img/section-bg-56.jpg' %}\">\n                <div class=\"js-height-parent container\">\n                    \n                    <!-- Hero Content -->\n                    <div class=\"home-content\">\n                        <div class=\"home-text\">\n                            \n                            <div class=\"row\">\n                        \n                                <div class=\"col-md-8 align-left\">\n                                    <h1 class=\"hs-line-11 font-alt mb-20 mb-xs-0\">WELCOME {{ request.user }}</h1>\n                                    <div class=\"hs-line-4 font-alt black\">\n                                        -It's time to test yourself if you are depressed\n                                    </div>\n                                </div>\n                                \n                               \n                            </div>\n                            \n                        </div>\n                    </div>\n                    <!-- End Hero Content -->\n                    \n                </div>\n            </section>\n            <!-- End Head Section -->\n\n\n\n              <!-- Divider -->\n            <hr class=\"mt-0 mb-0 \"/>\n            <!-- End Divider -->\n            \n            \n       \n\n\n             <!-- Features Section -->\n            <section class=\"page-section\">\n                <div class=\"container relative\">\n                    \n                    <h2 class=\"section-title font-alt mb-70 mb-sm-40\">\n                       TAKE THE TEST OR SEE YOUR SCORE!\n                    </h2>\n                    \n                    <!-- Features Grid -->\n                    <div class=\"row multi-columns-row alt-features-grid\">\n                        \n                        <!-- Features Item -->\n                        <div class=\"col-sm-6 col-md-4 col-lg-4\">\n                            <div class=\"alt-features-item align-center\">\n                                <div class=\"alt-features-icon\">\n                                    <span class=\"icon-flag\"></span>\n                                </div>\n                                <div class=\"benefit-icon\">\n                              <i class=\"fa fa-question-circle fa-4x\" aria-hidden=\"true\"></i>\n                            </div>\n                              <a href='{% url \"question_single\" id=1 %}'>  <h3 class=\"alt-features-title font-alt\">TAKE TEST</h3></a>\n                                <div class=\"alt-features-descr align-left\">\n                                    Lets get started! Answer a few questions and we will let you know your score\n                                </div>\n                            </div>\n                        </div>\n                        <!-- End Features Item -->\n                        \n                        <!-- Features Item -->\n                        <div class=\"col-sm-6 col-md-4 col-lg-4\">\n                           \n                        </div>\n                        <!-- End Features Item -->\n                        \n                        <!-- Features Item -->\n                        <div class=\"col-sm-6 col-md-4 col-lg-4\">\n                            <div class=\"alt-features-item align-center\">\n                                <div class=\"alt-features-icon\">\n                                    <span class=\"icon-hotairballoon\"></span>\n                                </div>\n\n                                 <div class=\"benefit-icon\">\n                               <i class=\"fa fa-pie-chart fa-4x\" aria-hidden=\"true\"></i>\n                            </div>\n                              <a href='{% url \"user_result\" %}' >  <h3 class=\"alt-features-title font-alt\">SEE YOUR SCORE</h3></a>\n                                <div class=\"alt-features-descr align-left\">\n                                  THE WAIT IS OVER! IT'S TIME TO SEE YOUR SCORE\n                                </div>\n                            </div>\n                        </div>\n                        <!-- End Features Item -->\n                        \n                    </div>\n                    <!-- End Features Grid -->\n                        \n                </div>\n            </section>\n            <!-- End Features Section -->\n\n\n           \n            \n\n\n{% endblock %}",
 			"file": "src/templates/dashboard/home.html",
+			"file_size": 4482,
+			"file_write_time": 131405256140000000,
 			"settings":
 			{
 				"buffer_size": 4482,
@@ -263,16 +272,22 @@
 			}
 		},
 		{
+			"contents": "from django.conf import settings\nfrom django.conf.urls import include, url\nfrom django.conf.urls.static import static\nfrom django.contrib import admin\n\n\nurlpatterns = [\n    # Examples:\n    url(r'^$', 'dashboard.views.home', name='home'),\n    url(r'^question/(?P<id>\\d+)/$', 'questions.views.single', name='question_single'),\n    url(r'^question/$', 'questions.views.home', name='question_home'),\n    url(r'^result/$', 'dashboard.views.result', name='user_result'),\n    url(r'^contact/$', 'newsletter.views.contact', name='contact'),\n    url(r'^about/$', 'depressionassesment.views.about', name='about'),\n    url(r'^test/$', 'dashboard.views.test', name='test'),\n    url(r'^user-agreement/$', 'dashboard.views.user_agreement', name='user_agreement'),\n\n  \n\n\n    # url(r'^blog/', include('blog.urls')),\n\n    url(r'^admin/', include(admin.site.urls)),\n    url(r'^accounts/', include('registration.backends.default.urls')),\n    # url(r'^accounts/', include('registration.backends.simple.urls')),\n]\n\n# if settings.DEBUG:\nurlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)\nurlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)\n\n",
 			"file": "src/depressionassesment/urls.py",
+			"file_size": 1172,
+			"file_write_time": 131405328080000000,
 			"settings":
 			{
-				"buffer_size": 1211,
+				"buffer_size": 1172,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
+			"contents": "",
 			"file": "src/templates/dashboard/listenAudio.html",
+			"file_size": 0,
+			"file_write_time": 131397728860000000,
 			"settings":
 			{
 				"buffer_size": 0,
@@ -312,19 +327,25 @@
 			}
 		},
 		{
+			"contents": "# -*- coding: utf-8 -*-\nimport io\nfrom django.conf import settings\nfrom django.http import Http404,HttpResponseRedirect\nfrom httplib2 import Http\nfrom django.shortcuts import render, get_object_or_404,redirect\nfrom googleapiclient.discovery import build\nfrom googleapiclient import discovery\nfrom django.core.urlresolvers  import reverse\nfrom oauth2client.service_account import ServiceAccountCredentials\nimport speech_recognition as sr\nimport io\nimport os\nfrom os.path import join\nimport time\nfrom google.cloud import speech\nfrom django.core.files.base import ContentFile\nfrom django.core.files import File\nimport datetime\n\n# Create your views here.\n\nfrom .forms import UserResponseForm,UserTextFreeForm,DocumentForm\nfrom .models import Question, Answer, UserAnswer,UserTextAnswer, FreeTextAnswer,Document,UserAudioAnswer\n\ndef single(request,id):\n\tif request.user.is_authenticated():\n\n\t\tservice = build('translate', 'v2',\n            developerKey='AIzaSyBeClQpB9mVa_kp0YjgBPn3U35Z5QnL-wI')\n\t\t\n\t\t#FOR LOCAL USE\n\t\t# path = \"/Users/ammarkhan/Downloads/sentiment-analysis-921a452139e2.json\"\n\t\t#FOR HEROKU USE\n\n\t\tpath = os.path.join(settings.BASE_DIR, \"sentiment-analysis-921a452139e2.json\")\n\t\t#FOR ONLINE\n\t\t# path = \"/home/ammarkhan123/webapps/depressionassessment/SentimentAnalysis-bdc3f8ec8bc8.json\"\n\t\tscopes = ['https://www.googleapis.com/auth/cloud-platform']\n\t\tcredentials = ServiceAccountCredentials.from_json_keyfile_name(path, scopes)\n\n\t\thttp_auth = credentials.authorize(Http())\n\t\tservice_sentiment = discovery.build('language', 'v1', credentials=credentials)\n\n\n\t\tqueryset = Question.objects.all().order_by('-timestamp')\n\t\tinstance = get_object_or_404(Question, id=id)\n\n\t\t\n\t\ttry:\n\t\t\tuser_answer = UserAnswer.objects.get(user=request.user, question=instance)\n\t\t\tupdated_q = True\n\t\texcept UserAnswer.DoesNotExist:\n\t\t\tuser_answer = UserAnswer()\n\t\t\tupdated_q = False\n\t\texcept UserAnswer.MultipleObjectsReturned:\n\t\t\tuser_answer = UserAnswer.objects.filter(user=request.user, question=instance)[0]\n\t\t\tupdated_q = True\n\t\texcept:\n\t\t\tuser_answer = UserAnswer()\n\t\t\tupdated_q = False\n\n\t\ttry:\n\t\t\tuser_audio_answer = UserAudioAnswer.objects.get(user=request.user,question=instance)\n\t\t\tupdated_user_audio_answer = True\n\t\texcept UserAudioAnswer.DoesNotExist:\n\t\t\tupdated_user_audio_answer = False\n\t\t\tuser_audio_answer = UserAudioAnswer()\n\t\texcept UserAudioAnswer.MultipleObjectsReturned:\n\t\t\tuser_audio_answer = UserAudioAnswer.objects.filter(user=request.user, question=instance)[0]\n\t\t\tupdated_user_audio_answer = True\n\t\texcept:\n\t\t\tuser_audio_answer = UserAudioAnswer()\n\t\t\tupdated_user_audio_answer = False\n\n\n\n\n\t\ttry:\n\t\t\tuser_text_answer = UserTextAnswer.objects.get(user=request.user, question=instance)\n\t\t\tupdated_user_text_answer = True\n\t\t\tinitial_dict = {\n\t\t\t\"my_answer\": user_text_answer.my_answer.text\n\t\t\t}\n\t\texcept UserTextAnswer.DoesNotExist:\n\t\t\tupdated_user_text_answer = False\n\t\t\tuser_text_answer = UserTextAnswer()\n\t\t\tinitial_dict = {\n\t\t\t\n\t\t\t}\n\t\texcept UserTextAnswer.MultipleObjectsReturned:\n\t\t\tuser_text_answer = UserTextAnswer.objects.filter(user=request.user, question=instance)[0]\n\t\t\tupdated_user_text_answer = True\n\t\t\tinitial_dict = {\n\t\t\t\"my_answer\": user_text_answer.my_answer.text\n\t\t\t}\n\t\texcept:\n\t\t\tuser_text_answer = UserTextAnswer()\n\t\t\tupdated_user_text_answer = False\n\t\t\tinitial_dict = {\n\t\t\t\n\t\t\t}\n\n\n\t\t\n\t\ttry:\n\t\t\tfree_text_answer = FreeTextAnswer.objects.get(answers_id=instance.id)\n\t\texcept FreeTextAnswer.DoesNotExist:\n\t\t\tfree_text_answer = FreeTextAnswer()\n\t\texcept FreeTextAnswer.MultipleObjectsReturned:\n\t\t\tfree_text_answer = FreeTextAnswer.objects.filter(answers_id=instance.id)[0]\n\t\texcept:\n\t\t\tfree_text_answer = FreeTextAnswer()\n\n\t\t\n\n\n\t\tform2 = UserTextFreeForm(request.POST or None, initial = initial_dict)\t\n\t\tform = UserResponseForm(request.POST or None)\n\n\t\taudio_file_path = None\n\t\t\n\n\n\t\tr = sr.Recognizer()\n\t\tif instance.question_type == 'audio_input':\n\n\t\t\tprint request.GET\n\t\t\tif '_start' in request.GET:\n\t\t\t\tprint(\"Start Recording\")\n\t\t\t\t\n\t\t\t\taudio_file_path = start_recording(r,request)\n\t\t\t\tquestion_instance = Question.objects.get(id=instance.id)\n\t\t\t\tuser_audio_answer.user = request.user\n\t\t\t\tuser_audio_answer.question = question_instance\n\t\t\n\n\t\t\t\tturkish_speech_to_text = r.recognize_google(user_received_audio, language = \"tr-TR\")\n\t\t\t\tuser_audio_answer.turkish_speech_to_text = turkish_speech_to_text\n\n\t\t\t\tabc = service.translations().list(\n\t\t\t\t\t\t \t source='tr',\n\t\t\t\t\t\ttarget='en',\n\t\t\t\t\t\tq=[turkish_speech_to_text]\n\t\t\t\t).execute()\n\n\t\t\t\tturkish_translated_text = abc['translations'][0]['translatedText']\n\n\t\t\t\tuser_audio_answer.translated_english_answer = turkish_translated_text\n\n\n\t\t\t\tservice_request = service_sentiment.documents().analyzeSentiment(\n\t\t\t\t\tbody={\n\t\t\t\t\t'document': {\n\t\t\t\t\t'type': 'PLAIN_TEXT',\n\t\t\t\t\t'content': turkish_translated_text,\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t)\n\n\t\t\t\tresponse = service_request.execute()\n\n\t\t\t\tscore = response['documentSentiment']['score']\n\t\t\t\t\n\n\t\t\t\treal_score = calculate_user_score(score)\n\t\t\t\tuser_audio_answer.my_points = real_score\n\t\t\t\tuser_audio_answer.save()\n\t\t\telif '_submit' in request.GET:\n\t\t\t\t\n\t\t\t\tif user_audio_answer.my_points is not -1:\n\t\t\t\t\tnext_q = Question.objects.get_unanswered(request.user).order_by(\"?\")\n\t\t\t\t\tif next_q.count() > 0:\n\t\t\t\t\t\tnext_q_instance = next_q.first()\n\t\t\t\t\t\treturn redirect(\"question_single\",id=next_q_instance.id)\n\t\t\t\t\telse:\n\t\t\t\t\t\treturn redirect(\"home\")\n\n\n\t\t\tif request.GET.get('StartRecording') == 'StartRecording':\n\t\t\t\tr = sr.Recognizer()\n\t\t\t\twith sr.Microphone() as source:\n\t\t\t\t\tprint(\"Say something!\")\n\t\t\t\t\taudio = r.listen(source)\n\n\t\t\t\tspeech_to_text = r.recognize_google(user_received_audio, language = \"tr-TR\")\n\t\t\t\n\t\t\t\tquestion_instance = Question.objects.get(id=instance.id)\n\t\t\t\tfree_text_answer.answers = question_instance\n\t\t\t\tfree_text_answer.text = speech_to_text\n\t\t\t\tfree_text_answer.save()\n\n\n\n\n\n\t\n\t\tif form2.is_valid():\n\t\t\t\n\t\t\t\n\t\t\tquestion_id = form2.cleaned_data.get('question_id')\n\t\t\tuser_text_input = form2.cleaned_data.get('my_answer')\n\n\t\t\tquestion_instance = Question.objects.get(id=question_id)\n\t\t\t\n\t\t\t\n\t\t\tfree_text_answer.answers = question_instance\n\t\t\tfree_text_answer.text = user_text_input\n\t\t\tfree_text_answer.save()\n\n\t\t\t\n\n\t\t\tabc = service.translations().list(\n\t \t\t\t\t\t \t source='tr',\n  \t\t\t\t\t\ttarget='en',\n  \t\t\t\t\t\tq=[user_text_input]\n\t\t\t\t\t).execute()\n\n\t\t\tprint abc\n\t\t\tturkish_translated_text = abc['translations'][0]['translatedText']\n\n\t\t\t\n\n\n\t\t\tservice_request = service_sentiment.documents().analyzeSentiment(\n \t\t\t\t body={\n   \t\t\t \t\t\t'document': {\n    \t\t\t  \t\t'type': 'PLAIN_TEXT',\n    \t\t\t\t  'content': turkish_translated_text,\n   \t\t\t\t\t }\n \t\t \t\t\t\t}\n\t\t\t\t\t )\n\t\t\tresponse = service_request.execute()\n\n\t\t\tscore = response['documentSentiment']['score']\n\t\t\tmagnitude = response['documentSentiment']['magnitude']\n\n\t\t\treal_score = calculate_user_score(score)\n\n\t\t\tprint \"The score is %s and the magnitude of this sentence is %s\" %(score,magnitude)\n\n\t\t\tuser_text_answer.user = request.user\n\t\t\tuser_text_answer.question = question_instance\n\t\t\tuser_text_answer.my_answer = free_text_answer\n\t\t\tuser_text_answer.translated_answer = turkish_translated_text\n\t\t\tuser_text_answer.my_points = real_score\n\t\t\tuser_text_answer.save()\n\t\t\t\n\t\t\tnext_q = Question.objects.get_unanswered(request.user).order_by(\"?\")\n\t\t\tprint \"The qs from form 2 is %s\" %(next_q)\n\t\t\tif next_q.count() > 0:\n\t\t\t\tnext_q_instance = next_q.first()\n\t\t\t\treturn redirect(\"question_single\",id=next_q_instance.id)\n\t\t\telse:\n\t\t\t\treturn redirect(\"home\")\n\n\t\tif form.is_valid():\n\n\t\t\tquestion_id = form.cleaned_data.get('question_id') #form.cleaned_data['question_id']\n\t\t\tanswer_id = form.cleaned_data.get('answer_id')\n\t\t\tquestion_instance = Question.objects.get(id=question_id)\n\t\t\tanswer_instance = Answer.objects.get(id=answer_id)\n\t\t\n\n\t\t\tuser_answer.user = request.user\n\t\t\tuser_answer.question = question_instance\n\t\t\tuser_answer.my_answer = answer_instance\n\t\t\tuser_answer.save()\n\n\n\t\t\tnext_q = Question.objects.get_unanswered(request.user).order_by(\"?\")\n\t\t\tprint \"The qs from form 1 is %s\" %(next_q)\n\t\t\tif next_q.count() > 0:\n\n\t\t\t\tnext_q_instance = next_q.first()\n\n\t\t\t\treturn redirect(\"question_single\",id=next_q_instance.id)\n\t\t\telse:\n\t\t\t\t\n\t\t\t\treturn redirect(\"home\")\n\t\t\n\t\tcontext = {\n\t\t\t\"form\": form,\n\t\t\t\"form2\": form2,\n\t\t\t\"instance\": instance,\n\t\t\t\"user_answer\": user_answer,\n\t\t\t\"user_text_answer\": user_text_answer,\n\t\t\t\"free_text_answer\": free_text_answer,\n\t\t\t\"user_audio\": user_received_audio,\n\t\t\t\"user_audio_answer\": user_audio_answer,\n\t\t\t\"audio_file_path\": audio_file_path,\n\t\t\t\n\t\t}\n\t\treturn render(request, \"questions/single.html\", context)\n\telse:\n\t\traise Http404\n\n\n\ndef calculate_user_score(score):\n\tscore_range_constant = 0.6\n\ttotal_score_range = 1.4\n\n\ttemp_score = score+score_range_constant\n\tactual_score = temp_score/total_score_range\n\tscore_percentage = actual_score*100\n\treturn score_percentage\n\n\ndef home(request):\n\tif request.user.is_authenticated():\n\t\tform = UserResponseForm(request.POST or None)\n\t\tif form.is_valid():\n\t\t\tquestion_id = form.cleaned_data.get('question_id') #form.cleaned_data['question_id']\n\t\t\tanswer_id = form.cleaned_data.get('answer_id')\n\t\t\tquestion_instance = Question.objects.get(id=question_id)\n\t\t\tanswer_instance = Answer.objects.get(id=answer_id)\n\t\t\tprint answer_instance.text, question_instance.text\n\n\t\tqueryset = Question.objects.all().order_by('-timestamp')\n\t\tinstance = queryset[1]\n\t\tcontext = {\n\t\t\t\"form\": form,\n\t\t\t\"instance\": instance,\n\t\t\t#\"queryset\": queryset\n\t\t}\n\t\treturn render(request, \"questions/home.html\", context)\n\telse:\n\t\traise Http404\n\n\n\n\nuser_received_audio = None\n\n\ndef start_recording(r,request):\n\n\tprint(\"Reached start recording metho. About to start recording\")\n\n\n\twith sr.Microphone() as source:\n\t\tprint(\"Say something!\")\n\t\taudio = r.record(source,duration=10)\n\n\tglobal user_received_audio\n\tuser_received_audio = audio\n\trandom_file_name = request.user.username + \"-\" + datetime.datetime.now().strftime('%d:%m:%Y')\n\tfull_path = save_user_audio_file(request,random_file_name)\n\treturn full_path\n\ndef save_user_audio_file(request,file_name):\n\t\n\tpath = settings.MEDIA_ROOT+\"/\"+request.user.username\n\tfull_path = os.path.join(path,file_name)\n\twith open(full_path+\".flac\",\"wb\") as f:\n\t\tf.write(user_received_audio.get_flac_data())\n\tfull_path = full_path+\".flac\"\n\tprint(\"audio file saved\")\n\treturn full_path\n\n\n\n\n\n\n\n\n",
 			"file": "src/questions/views.py",
+			"file_size": 10220,
+			"file_write_time": 131405327850000000,
 			"settings":
 			{
-				"buffer_size": 14213,
+				"buffer_size": 10220,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
+			"contents": "\n<!-- \n{% if instance.question_type == 'text_input' %}\n\n<form method='POST' action='{% url \"question_single\" id=instance.id%}' > {% csrf_token %}\n\n<h1>{{ instance.text }}</h1>\n\n<input type='hidden' name='question_id' value='{{ instance.id }}' />\n\n<h3>Your answer</h3>\n\n   {{ form2.my_answer.errors }}\n\t{{ form2.my_answer }}\n\n\n\n\n<input type='submit' value='Save and continue' />\n\n<input type='hidden' name='form1' />\n</form>\n\n\n\n{% else %}\n\n\n<form method='POST' action='{% url \"question_single\" id=instance.id%}' > {% csrf_token %}\n{{ form.errors }}\n<h1>{{ instance.text }}</h1>\n\n<input type='hidden' name='question_id' value='{{ instance.id }}' />\n\n<h3>Your answer</h3>\n{% for ans in instance.answer_set.all %}\n\n\n<input type='radio' name='answer_id' value='{{ ans.id }}' {% if user_answer.my_answer.id == ans.id %}checked=checked{% endif %} /> {{ ans.text }} <br/>\n\n{% endfor %}\n\n\n\n<! <label for=\"id_answer_text\">Answer text:</label>\n<input id=\"id_answer_text\" name=\"answer_text\" type=\"text\"> -->\n<!-- \n<br/>\n\n\n\n<input type='submit' value='Save and continue' />\n\n<input type='hidden' name='form1' />\n</form>\n\n\n{% endif %}\n --> <!-- -->\n\n\n\n\n  \n              <!-- Section -->\n            <section class=\"page-section\">\n                <div class=\"container relative\">\n                    \n                    <div class=\"row\">\n                        \n                        <!-- Content -->\n                        <div class=\"col-sm-10 col-sm-offset-1\">\n                            \n                            <!-- Post -->\n                            <div class=\"blog-item\">\n                                \n                                <!-- Date -->\n                                <div class=\"blog-item-date\">\n                                    <!-- <span class=\"date-num\">05</span>Feb -->\n                                </div>\n                                \n\n                                {% if instance.question_type == 'text_input' %}\n                                <!-- Post Title -->\n                                <h2 class=\"blog-item-title font-alt\">{{instance.text}}</a></h2>\n                                \n                                                        \n                                <!-- Text Intro -->\n                                <div class=\"blog-item-body\">\n                                  \n\n                               <form method='POST' action='{% url \"question_single\" id=instance.id%}' > {% csrf_token %}\n\n\t\t\t\t\t\t\t\n\n\t\t\t\t\t\t\t\t\t<input type='hidden' name='question_id' value='{{ instance.id }}' />\n\n\t\t\t\t\t\t\t\t<h3>Your answer</h3>\n\n\t\t\t\t\t\t\t   {{ form2.my_answer.errors }}\n\t\t\t\t\t\t\t\t{{ form2.my_answer }}\n\n\n\t\t\t\t\t\t\t\t <div class=\"mb-10\">\n\n                                \n                            </div>\n\n                            \n\n\n\t\t\t\t\t\t\t<input type='submit' value='Save and continue'  class=\"btn btn-mod btn-circle btn-large\"/>\n\n\t\t\t\t\t\t\t<input type='hidden' name='form1' />\n\t\t\t\t\t\t\t</form>\n\n                                </div>\n\n\n\n                                {% elif instance.question_type == 'audio_input' %}\n\n                                     <h2 class=\"blog-item-title font-alt\">{{instance.text}}</a></h2>\n\n\n\n                         \n\n                                    <form method='get' action='#'>\n                                      <!--   <input type=\"submit\" value=\"Next\" name=\"Next\" id='start'/> -->\n\n                                        <td><input type=\"submit\" value=\"StartRecording\" name=\"_start\" id='start'></td>\n                                         <td><input type=\"submit\" value=\"Submit\" name=\"_submit\"></td>\n\n                                    </form>\n                                  <!--   {{ audio_file_path }}\n\n                                        <audio controls>\n                                          \n                                         <source src=\"{{ path }}\" type=\"audio/flac\">\n                                        Your browser does not support the audio element.\n                                        </audio> -->\n                                            {{ user_audio_answer.audio_file }}\n\n                                            {% if user_audio_answer.turkish_speech_to_text %}\n\n                                            <h1>Your Speech Input To Turkish Text:</h1>\n                                           <p> {{ user_audio_answer.turkish_speech_to_text }} </p>\n\n                                           {% else %}\n\n                                           <h2>Start Recording to get your Turkish speech to text input</h2>\n\n                                            {% endif %}\n\n                                             {% if user_audio_answer.translated_english_answer %}\n\n                                                    <h1>Your Translated Turkish Text:</h1>\n                                           <p> {{ user_audio_answer.translated_english_answer }} </p>\n\n                                             {% else %}\n\n                                           <h2>Start Recording to get your Turkish translated speech</h2>\n\n                                            {% endif %}\n\n\n\n\n                                    <p id='message'>Time remaining to record is<span id='count'> 5</span> seconds.</p>\n\n\n    \n\n\n\n                                {% else %}\n\n\n\n\n                                      <!-- Post Title -->\n                                <h2 class=\"blog-item-title font-alt\">{{instance.text}}</a></h2>\n                                \n                                                        \n                                <!-- Text Intro -->\n                                <div class=\"blog-item-body\">\n                                  \n\n                              <form method='POST' action='{% url \"question_single\" id=instance.id%}' > {% csrf_token %}\n\t\t\t\t\t\t\t\t{{ form.errors }}\n\t\t\t\t\t\t\t\n\n\t\t\t\t\t\t\t\t<input type='hidden' name='question_id' value='{{ instance.id }}' />\n\n\t\t\t\t\t\t\t\t<h3>Your answer</h3>\n\t\t\t\t\t\t\t\t{% for ans in instance.answer_set.all %}\n\n\n\t\t\t\t\t\t\t\t<input type='radio' name='answer_id' value='{{ ans.id }}' {% if user_answer.my_answer.id == ans.id %}checked=checked{% endif %} /> {{ ans.text }} <br/>\n\n\t\t\t\t\t\t\t\t{% endfor %}\n\n\n\t\t\t\t\t\t\t\t<br/>\n\n\n\n\t\t\t\t\t\t\t\t<input type='submit' value='Save and continue' class=\"btn btn-mod btn-circle btn-large\" />\n\n\t\t\t\t\t\t\t\t<input type='hidden' name='form1' />\n\t\t\t\t\t\t\t\t</form>\n\n\n\n                                </div>\n                                    \n                           {% endif %}\n                             \n                                \n                            </div>\n                            <!-- End Post -->\n                            \n                           \n                           \n                        \n                       \n                            \n                        \n                            \n                        </div>\n                        <!-- End Content -->\n                        \n                    </div>\n                    \n                </div>\n            </section>\n            <!-- End Section -->\n\n\n\n<script type=\"text/javascript\">\n           \n\n{% block jquery %}\nvar message = document.getElementById(\"message\");\nvar startBtn = document.getElementById(\"start\");\nvar count = document.getElementById(\"count\");\nvar timer;\nvar counter = 50;\nvar downloadLink = document.createElement(\"a\");\n// downloadLink.href = \"downloadFile.zip\";\n// downloadLink.className += \"button\";\n// downloadLink.innerHTML = \"Download the file...\";\n\nfunction startDownload() {\n    this.style.display = 'none';\n    timer = setInterval(function () {\n        counter--;\n        if (counter < 0) {\n            // message.style.display = 'none';\n            // startBtn.parentNode.appendChild(downloadLink);\n            // clearInterval(timer);\n        } else {\n            count.innerHTML = \" \"+counter.toString();\n        }\n    }, 1000);\n};\nstartBtn.onclick = startDownload;\n\n{% endblock %}\n  \n\n\n</script>",
 			"file": "src/templates/questions/user_response_form.html",
+			"file_size": 7957,
+			"file_write_time": 131405257460000000,
 			"settings":
 			{
-				"buffer_size": 7546,
+				"buffer_size": 7957,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -339,7 +360,10 @@
 			}
 		},
 		{
+			"contents": "ServerRoot \"/home/ammarkhan123/webapps/depressionassesment/apache2\"\n\nLoadModule authz_core_module modules/mod_authz_core.so\nLoadModule dir_module        modules/mod_dir.so\nLoadModule env_module        modules/mod_env.so\nLoadModule log_config_module modules/mod_log_config.so\nLoadModule mime_module       modules/mod_mime.so\nLoadModule rewrite_module    modules/mod_rewrite.so\nLoadModule setenvif_module   modules/mod_setenvif.so\nLoadModule wsgi_module       modules/mod_wsgi.so\nLoadModule unixd_module      modules/mod_unixd.so\n\nLogFormat \"%{X-Forwarded-For}i %l %u %t \\\"%r\\\" %>s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" combined\nCustomLog /home/ammarkhan123/logs/user/access_depressionassesment.log combined\nErrorLog /home/ammarkhan123/logs/user/error_depressionassesment.log\n\nListen 31483\nKeepAlive Off\nSetEnvIf X-Forwarded-SSL on HTTPS=1\nServerLimit 1\nStartServers 1\nMaxRequestWorkers 5\nMinSpareThreads 1\nMaxSpareThreads 3\nThreadsPerChild 5\n\nWSGIDaemonProcess depressionassesment processes=2 threads=12 python-path=/home/ammarkhan123/webapps/depressionassesment:/home/ammarkhan123/webapps/depressionassesment/src:/home/ammarkhan123/webapps/depressionassesment/lib/python2.7\nWSGIProcessGroup depressionassesment\nWSGIRestrictEmbedded On\nWSGILazyInitialization On\nWSGIScriptAlias / /home/ammarkhan123/webapps/depressionassesment/src/depressionassesment/wsgi.py\n",
 			"file": "webfaction/httpd.conf",
+			"file_size": 1359,
+			"file_write_time": 131401286300000000,
 			"settings":
 			{
 				"buffer_size": 1359,
@@ -348,16 +372,22 @@
 			}
 		},
 		{
+			"contents": "from django.conf import settings\nfrom django.db import models\nfrom django.db.models.signals import post_save, pre_save\nfrom django.dispatch import receiver\t\nfrom django.db.models import Q\nimport os.path\n\n# Create your models here.\n\nQuestion_Types_Choices = (\n    ('multiple_choice', ('multiple_choice')),\n    ('audio_input', ('audio_input')),\n    ('text_input', ('text_input'))\n)\n\nclass QuestionManager(models.Manager):\n\tdef get_unanswered(self, user):\n\t\tq1 = Q(useranswer__user = user)\n\t\tq2 = Q(usertextanswer__user = user)\n\t\tq3 = Q(useraudioanswer__user = user)\n\t\tqs = self.exclude(q1 | q2 | q3)\n\t\treturn qs\n\n\t# def get_usertext_unanswered(self,user):\n\t# \tq1 = Q(usertextanswer__user = user)\n\t# \tqs = self.exclude(q1)\n\t# \treturn qs\n\nclass Question(models.Model):\n\ttext = models.TextField()\n\tactive = models.BooleanField(default=True)\n\tquestion_type = models.CharField(max_length = 250, choices =Question_Types_Choices)\n\ttimestamp = models.DateTimeField(auto_now_add=True , auto_now=False)\n\t\n\tobjects = QuestionManager()\n\n\n\tdef __unicode__(self):\n\t\treturn self.text[:10]\n\nclass Answer(models.Model):\n\tanswers = models.ForeignKey(Question)\n\ttext = models.TextField(blank=True,null=True)\n\tactive = models.BooleanField(default=True)\n\ttimestamp = models.DateTimeField(auto_now_add=True , auto_now=False)\n\n\tdef __unicode__(self):\n\t\treturn self.text[:10]\n\nclass FreeTextAnswer(models.Model):\n\tanswers = models.ForeignKey(Question)\n\ttext = models.TextField(blank=True, null=True)\n\tactive = models.BooleanField(default=True)\n\ttimestamp = models.DateTimeField(auto_now_add=True , auto_now=False)\n\n\tdef __unicode__(self):\n\t\treturn self.text[:10]\n\n\nclass UserAnswer(models.Model):\n\tuser = models.ForeignKey(settings.AUTH_USER_MODEL)\n\tquestion = models.ForeignKey(Question)  \n\tmy_answer = models.ForeignKey(Answer)\n\tmy_points = models.IntegerField(default=-1)\n\ttimestamp = models.DateTimeField(auto_now_add=True, auto_now=False)\n\n\n\tdef __unicode__(self):\n\t\treturn self.my_answer.text[:10]\n\n\n\nclass UserTextAnswer(models.Model):\n\tuser = models.ForeignKey(settings.AUTH_USER_MODEL)\n\tquestion = models.ForeignKey(Question)  \n\tmy_answer = models.ForeignKey(FreeTextAnswer)\n\ttranslated_answer = models.TextField(null=True, blank=True)\n\tmy_points = models.IntegerField(default=-1)\n\ttimestamp = models.DateTimeField(auto_now_add=True, auto_now=False)\n\n\tdef __unicode__(self):\n\t\treturn self.my_answer.text[:10]\n\n\ndef upload_to(instance, filename):\n\n\treturn os.path.join('/%s/' % instance.user.username, filename)\n\nclass UserAudioAnswer(models.Model):\n\tuser = models.ForeignKey(settings.AUTH_USER_MODEL)\n\tquestion = models.ForeignKey(Question)\n\taudio_file = models.FileField(upload_to=upload_to)\n\tturkish_speech_to_text = models.TextField(null=True,blank=True)\n\ttranslated_english_answer = models.TextField(null=True, blank=True)\n\n\tmy_points = models.IntegerField(default=-1)\n\t\n\tdef __unicode__(self):\n\t\treturn self.question.text\n\n\n\n\nclass Document(models.Model):\n    docfile = models.FileField(upload_to='documents/%Y/%m/%d')\n\ndef score_calculation(instance):\n\n\tobj = Question.objects.get(id=instance.question.id)\n\tfor idx, ans in enumerate(obj.answer_set.all()):\n\n\t\tif ans == instance.my_answer and idx == 0:\n\t\t\tpoints = 100\n\t\t\treturn points\n\t\telif ans == instance.my_answer and idx == 1:\n\t\t\tpoints = 75\n\t\t\treturn points\n\n\t\telif ans == instance.my_answer and idx == 2:\n\t\t\tpoints = 50\n\t\t\treturn points\n\n\t\telif ans == instance.my_answer and idx == 3:\n\t\t\tpoints = 25\n\t\t\treturn points\n\n\n\n\t\t\t\n@receiver(pre_save, sender=UserAnswer)\ndef update_user_answer_score(sender,instance,*args,**kwargs):\t\n\tmy_points = score_calculation(instance)\n\tinstance.my_points = my_points\n\t\n\n\n\n\n\n\n\n\n\n\n\n",
 			"file": "src/questions/models.py",
+			"file_size": 3658,
+			"file_write_time": 131405233590000000,
 			"settings":
 			{
-				"buffer_size": 3592,
+				"buffer_size": 3658,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
+			"contents": "\"\"\"\nDjango settings for depressionassesment project.\n\nGenerated by 'django-admin startproject' using Django 1.8.\n\nFor more information on this file, see\nhttps://docs.djangoproject.com/en/1.8/topics/settings/\n\nFor the full list of settings and their values, see\nhttps://docs.djangoproject.com/en/1.8/ref/settings/\n\"\"\"\n\n# Build paths inside the project like this: os.path.join(BASE_DIR, ...)\nimport os\n\nBASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n#root of project\n\n# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/\n\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'csqwlmc8s55o($rt6ozh7u+ui9zb-et00w$d90j8$^!nvj41_r'\n\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\n\nALLOWED_HOSTS = []\n\nEMAIL_HOST = 'smtp.webfaction.com'\nEMAIL_HOST_USER = 'go_jugaar'\nEMAIL_HOST_PASSWORD = '136499021024512Wf!!'\nEMAIL_PORT = 587\nEMAIL_USE_TLS = True\n\n''' \nIf using gmail, you will need to\nunlock Captcha to enable Django \nto  send for you:\nhttps://accounts.google.com/displayunlockcaptcha\n'''\n\n\n\n\n# Application definition\n\nINSTALLED_APPS = (\n    #django app\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.sites',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n    #third party apps\n    'crispy_forms',\n    'registration',\n    #my apps\n    'newsletter',\n    'questions',\n    'dashboard',\n    'widget_tweaks',\n    'django_extensions',\n    \n    \n    \n\n)\n\nMIDDLEWARE_CLASSES = (\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.middleware.csrf.CsrfViewMiddleware',\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n    'django.middleware.security.SecurityMiddleware',\n)\n\nROOT_URLCONF = 'depressionassesment.urls'\n\nTEMPLATES = [\n    {\n        'BACKEND': 'django.template.backends.django.DjangoTemplates',\n        'DIRS': [os.path.join(BASE_DIR, \"templates\")],\n        'APP_DIRS': True,\n        'OPTIONS': {\n            'context_processors': [\n                'django.template.context_processors.debug',\n                'django.template.context_processors.request',\n                'django.contrib.auth.context_processors.auth',\n                'django.contrib.messages.context_processors.messages',\n            ],\n        },\n    },\n]\n\nWSGI_APPLICATION = 'depressionassesment.wsgi.application'\n\n\n# Database\n# https://docs.djangoproject.com/en/1.8/ref/settings/#databases\n\nDATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.sqlite3',\n        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),\n    }\n}\n\n\n# Internationalization\n# https://docs.djangoproject.com/en/1.8/topics/i18n/\n\nLANGUAGE_CODE = 'en-us'\n\nTIME_ZONE = 'Europe/Istanbul'\n\nUSE_I18N = True\n\nUSE_L10N = True\n\nUSE_TZ = True\n\n\nGRAPH_MODELS = {\n  'all_applications': True,\n  'group_models': True,\n}\n\n\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/1.8/howto/static-files/\n\nSTATIC_URL = '/static/'\n\nSTATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), \"static_in_env\", \"static_root\")\n    \nSTATICFILES_DIRS = (\n    os.path.join(BASE_DIR, \"static_in_pro\", \"our_static\"),\n    #os.path.join(BASE_DIR, \"static_in_env\"),\n    #'/var/www/static/',\n)\n\nMEDIA_URL = '/media/'\nMEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), \"static_in_env\", \"media_root\")\n\n\n\n#Crispy FORM TAGs SETTINGS\nCRISPY_TEMPLATE_PACK = 'bootstrap3'\n\n\n#DJANGO REGISTRATION REDUX SETTINGS\nACCOUNT_ACTIVATION_DAYS = 7\nREGISTRATION_AUTO_LOGIN = True\nSITE_ID = 1\nLOGIN_REDIRECT_URL = '/'\n\n\n\n\n\n",
 			"file": "src/depressionassesment/settings/local.py",
+			"file_size": 3911,
+			"file_write_time": 131402015330000000,
 			"settings":
 			{
 				"buffer_size": 3911,
@@ -366,7 +396,10 @@
 			}
 		},
 		{
+			"contents": "\n#static is here mvpland_static\n#postgresql -- mvpland\n#username -- cfedeploy\n#password -- ##\n\n\n\"\"\"\nDjango settings for depressionassesment project.\n\nGenerated by 'django-admin startproject' using Django 1.8.\n\nFor more information on this file, see\nhttps://docs.djangoproject.com/en/1.8/topics/settings/\n\nFor the full list of settings and their values, see\nhttps://docs.djangoproject.com/en/1.8/ref/settings/\n\"\"\"\n\n# Build paths inside the project like this: os.path.join(BASE_DIR, ...)\n\nfrom django.conf import settings\n\n\nimport os\n\nBASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n#root of project\n\n# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/\n\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'csqwlmc8s55o($rt6ozh7u+ui9zb-et00w$d90j8$^!nvj41_r'\n\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\n\n\n\nALLOWED_HOSTS = ['depressionassessment.herokuapp.com']\n#purchasing domain name http://name.com\n\n\nEMAIL_HOST = 'smtp.webfaction.com'\nEMAIL_HOST_USER = 'go_jugaar'\nEMAIL_HOST_PASSWORD = '136499021024512Wf!!'\nEMAIL_PORT = 587\nEMAIL_USE_TLS = True\n\n\n''' \nIf using gmail, you will need to\nunlock Captcha to enable Django \nto  send for you:\nhttps://accounts.google.com/displayunlockcaptcha\n'''\n\n\nGOOGLE_APPLICATION_CREDENTIALS = '/Users/ammarkhan/Desktop/SentimentAnalysis-bdc3f8ec8bc8.json'\n# Application definition\n\nINSTALLED_APPS = (\n    #django app\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.sites',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n    #third party apps\n    'crispy_forms',\n    'registration',\n    #my apps\n    'newsletter',\n    'questions',\n    'dashboard',\n    'widget_tweaks',\n    'django_extensions',\n   \n)\n\nMIDDLEWARE_CLASSES = (\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.middleware.csrf.CsrfViewMiddleware',\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n    'django.middleware.security.SecurityMiddleware',\n)\n\nROOT_URLCONF = 'depressionassesment.urls'\n\nTEMPLATES = [\n    {\n        'BACKEND': 'django.template.backends.django.DjangoTemplates',\n        'DIRS': ''[os.path.join(BASE_DIR, \"templates\")]'',\n        'APP_DIRS': True,\n        'OPTIONS': {\n            'context_processors': [\n                'django.template.context_processors.debug',\n                'django.template.context_processors.request',\n                'django.contrib.auth.context_processors.auth',\n                'django.contrib.messages.context_processors.messages',\n            ],\n        },\n    },\n]\n\nWSGI_APPLICATION = 'depressionassesment.wsgi.application'\n\n\n# Database\n# https://docs.djangoproject.com/en/1.8/ref/settings/#databases\n\nfrom .db_password import DBPASS\n\nDATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.postgresql_psycopg2',\n        'NAME': \"depressionassesment\",\n        'USER': \"depressionassesment\",\n        'PASSWORD': \"136499021024512Wf!!\",\n    }\n}\n\n\n# Internationalization\n# https://docs.djangoproject.com/en/1.8/topics/i18n/\n\nLANGUAGE_CODE = 'en-us'\n\nTIME_ZONE = 'UTC'\n\nUSE_I18N = True\n\nUSE_L10N = True\n\nUSE_TZ = True\n\n\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/1.8/howto/static-files/\n\nSTATIC_URL = '/static/'\n\nSTATIC_ROOT =  os.path.join(BASE_DIR, \"static_in_pro\", \"our_static\")\n# os.path.join(os.path.dirname(BASE_DIR), \"static_in_env\", \"static_root\")\n# '/home/ammarkhan123/webapps/depressionassesment_static/static_root'\n\n    \nSTATICFILES_DIRS = (\n    os.path.join(BASE_DIR, \"static_in_env\", \"static_root\"),\n    \n)\n\n# os.path.join(BASE_DIR, \"static_in_pro\", \"our_static\"),\n    #os.path.join(BASE_DIR, \"static_in_env\"),\n    #'/var/www/static/',\n\nMEDIA_URL = '/media/'\n\nMEDIA_ROOT =  os.path.join(BASE_DIR, \"static_in_pro\", \"media_root\"),\n # os.path.join(os.path.dirname(BASE_DIR), \"static_in_env\", \"media_root\")\n# '/home/ammarkhan123/webapps/depressionassesment_static/media_root'\n\n\n\n\n\n#Crispy FORM TAGs SETTINGS\nCRISPY_TEMPLATE_PACK = 'bootstrap3'\n\n\n#DJANGO REGISTRATION REDUX SETTINGS\nACCOUNT_ACTIVATION_DAYS = 7\nREGISTRATION_AUTO_LOGIN = True\nSITE_ID = 1\nLOGIN_REDIRECT_URL = '/'\n\n\n\n\n\n",
 			"file": "src/depressionassesment/settings/production.py",
+			"file_size": 4559,
+			"file_write_time": 131404578560000000,
 			"settings":
 			{
 				"buffer_size": 4559,
@@ -375,16 +408,22 @@
 			}
 		},
 		{
+			"contents": "\"\"\"\nDjango settings for depressionassesment project.\n\nGenerated by 'django-admin startproject' using Django 1.8.\n\nFor more information on this file, see\nhttps://docs.djangoproject.com/en/1.8/topics/settings/\n\nFor the full list of settings and their values, see\nhttps://docs.djangoproject.com/en/1.8/ref/settings/\n\"\"\"\n\n# Build paths inside the project like this: os.path.join(BASE_DIR, ...)\nimport os\n\nBASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n#root of project\n\n# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/\n\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'csqwlmc8s55o($rt6ozh7u+ui9zb-et00w$d90j8$^!nvj41_r'\n\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\n\nALLOWED_HOSTS = ['depressionassessment.herokuapp.com']\n\n\nEMAIL_HOST = 'smtp.webfaction.com'\nEMAIL_HOST_USER = 'go_jugaar'\nEMAIL_HOST_PASSWORD = '136499021024512Wf!!'\nEMAIL_PORT = 587\nEMAIL_USE_TLS = True\nREGISTRATION_DEFAULT_FROM_EMAIL = 'hello@gojugaar.com'\n\n''' \nIf using gmail, you will need to\nunlock Captcha to enable Django \nto  send for you:\nhttps://accounts.google.com/displayunlockcaptcha\n'''\n\n\n# Application definition\n\nINSTALLED_APPS = (\n    #django app\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.sites',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n   #third party apps\n    'crispy_forms',\n    'registration',\n    #my apps\n    'newsletter',\n    'questions',\n    'dashboard',\n    'widget_tweaks',\n    'django_extensions',\n\n)\n\nMIDDLEWARE_CLASSES = (\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.middleware.csrf.CsrfViewMiddleware',\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n    'django.middleware.security.SecurityMiddleware',\n)\n\nROOT_URLCONF = 'depressionassesment.urls'\n\nTEMPLATES = [\n    {\n        'BACKEND': 'django.template.backends.django.DjangoTemplates',\n        'DIRS': [os.path.join(BASE_DIR, \"templates\")],\n        'APP_DIRS': True,\n        'OPTIONS': {\n            'context_processors': [\n                'django.template.context_processors.debug',\n                'django.template.context_processors.request',\n                'django.contrib.auth.context_processors.auth',\n                'django.contrib.messages.context_processors.messages',\n            ],\n        },\n    },\n]\n\nWSGI_APPLICATION = 'depressionassesment.wsgi.application'\n\n\n# Database\n# https://docs.djangoproject.com/en/1.8/ref/settings/#databases\n\nDATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.sqlite3',\n        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),\n    }\n}\n\n\n# Internationalization\n# https://docs.djangoproject.com/en/1.8/topics/i18n/\n\nLANGUAGE_CODE = 'en-us'\n\nTIME_ZONE = 'UTC'\n\nUSE_I18N = True\n\nUSE_L10N = True\n\nUSE_TZ = True\n\n\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/1.8/howto/static-files/\n\nSTATIC_URL = '/static/'\n\nSTATIC_ROOT =  os.path.join(BASE_DIR, \"static_in_pro\", \"our_static\")\n# os.path.join(os.path.dirname(BASE_DIR), \"static_in_env\", \"static_root\")\n# '/home/ammarkhan123/webapps/depressionassesment_static/static_root'\n\n    \nSTATICFILES_DIRS = (os.path.join(BASE_DIR, \"static_in_env\", \"static_root\"),\n    \n)\n\nMEDIA_URL = '/media/'\n\nMEDIA_ROOT =  os.path.join(BASE_DIR, \"static_in_pro\", \"media_root\"),\n # os.path.join(os.path.dirname(BASE_DIR), \"static_in_env\", \"media_root\")\n# '/home/ammarkhan123/webapps/depressionassesment_static/media_root'\n\n\nGRAPH_MODELS = {\n  'all_applications': True,\n  'group_models': True,\n}\n\n#Crispy FORM TAGs SETTINGS\nCRISPY_TEMPLATE_PACK = 'bootstrap3'\n\n\n#DJANGO REGISTRATION REDUX SETTINGS\nACCOUNT_ACTIVATION_DAYS = 7\nREGISTRATION_AUTO_LOGIN = True\nSITE_ID = 1\nLOGIN_REDIRECT_URL = '/'\n\n\n\n\n\n\n",
 			"file": "src/depressionassesment/settings/base.py",
+			"file_size": 4159,
+			"file_write_time": 131404606080000000,
 			"settings":
 			{
-				"buffer_size": 4158,
+				"buffer_size": 4159,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
+			"contents": "alabaster==0.7.9\namqp==2.1.4\nappdirs==1.4.3\nappnope==0.1.0\nBabel==2.3.4\nbackports-abc==0.5\nbackports.shutil-get-terminal-size==1.0.0\nbilliard==3.5.0.2\nbleach==2.0.0\ncachetools==2.0.0\ncelery==4.0.2\ncertifi==2017.4.17\ncffi==1.8.3\nconfigparser==3.5.0\ncryptography==1.5.2\ncycler==0.10.0\ndecorator==4.0.11\ndill==0.2.6\nDjango==1.8.18\ndjango-celery==3.2.1\ndjango-crispy-forms==1.6.1\ndjango-extensions==1.7.5\ndjango-registration-redux==1.4\ndjango-widget-tweaks==1.4.1\ndocutils==0.12\nentrypoints==0.2.2\nenum34==1.1.6\nfunctools32==3.2.3.post2\nfuture==0.16.0\nfutures==3.1.1\ngapic-google-cloud-datastore-v1==0.15.3\ngapic-google-cloud-error-reporting-v1beta1==0.15.3\ngapic-google-cloud-logging-v2==0.91.3\ngapic-google-cloud-pubsub-v1==0.15.4\ngapic-google-cloud-spanner-admin-database-v1==0.15.3\ngapic-google-cloud-spanner-admin-instance-v1==0.15.3\ngapic-google-cloud-spanner-v1==0.15.3\ngapic-google-cloud-speech-v1==0.15.3\ngapic-google-cloud-speech-v1beta1==0.15.3\ngapic-google-cloud-vision-v1==0.90.3\ngoogle-api-python-client==1.5.5\ngoogle-auth==1.0.0\ngoogle-auth-httplib2==0.0.2\ngoogle-cloud==0.25.0\ngoogle-cloud-bigquery==0.24.0\ngoogle-cloud-bigtable==0.24.0\ngoogle-cloud-core==0.24.1\ngoogle-cloud-datastore==1.0.0\ngoogle-cloud-dns==0.24.0\ngoogle-cloud-error-reporting==0.24.2\ngoogle-cloud-language==0.24.1\ngoogle-cloud-logging==1.0.0\ngoogle-cloud-monitoring==0.24.0\ngoogle-cloud-pubsub==0.25.0\ngoogle-cloud-resource-manager==0.24.0\ngoogle-cloud-runtimeconfig==0.24.0\ngoogle-cloud-spanner==0.24.1\ngoogle-cloud-speech==0.24.0\ngoogle-cloud-storage==1.1.1\ngoogle-cloud-translate==0.24.0\ngoogle-cloud-vision==0.24.0\ngoogle-gax==0.15.11\ngoogle-resumable-media==0.0.2\ngoogleapis-common-protos==1.5.2\ngrpc-google-cloud-speech-v1beta1==0.14.0\ngrpc-google-iam-v1==0.11.1\ngrpcio==1.3.0\ngunicorn==19.7.1\nhtml5lib==0.999999999\nhttplib2==0.10.3\nidna==2.1\nimagesize==0.7.1\nipaddress==1.0.17\nipykernel==4.6.1\nipython==5.3.0\nipython-genutils==0.2.0\nipywidgets==6.0.0\nJinja2==2.8\njsonschema==2.6.0\njupyter==1.0.0\njupyter-client==5.0.1\njupyter-console==5.1.0\njupyter-core==4.3.0\nkombu==4.0.2\nMarkupSafe==0.23\nmatplotlib==2.0.2\nmistune==0.7.4\nmpmath==0.19\nnbconvert==5.1.1\nnbformat==4.3.0\nndg-httpsclient==0.4.2\nnose==1.3.7\nnotebook==5.0.0\nnumpy==1.12.1\noauth2client==3.0.0\npackaging==16.8\npandas==0.20.1\npandocfilters==1.4.1\npathlib2==2.2.1\npexpect==4.2.1\npickleshare==0.7.4\nply==3.8\nprompt-toolkit==1.0.14\nproto-google-cloud-datastore-v1==0.90.4\nproto-google-cloud-error-reporting-v1beta1==0.15.3\nproto-google-cloud-logging-v2==0.91.3\nproto-google-cloud-pubsub-v1==0.15.4\nproto-google-cloud-spanner-admin-database-v1==0.15.3\nproto-google-cloud-spanner-admin-instance-v1==0.15.3\nproto-google-cloud-spanner-v1==0.15.3\nproto-google-cloud-speech-v1==0.15.3\nproto-google-cloud-speech-v1beta1==0.15.3\nproto-google-cloud-vision-v1==0.90.3\nprotobuf==3.3.0\nptyprocess==0.5.1\npyasn1==0.2.3\npyasn1-modules==0.0.8\npycparser==2.17\npydot==1.2.3\nPygments==2.1.3\npyOpenSSL==16.2.0\npyparsing==2.2.0\nPySoundFile==0.9.0.post1\npython-dateutil==2.6.0\npytz==2016.7\npyzmq==16.0.2\nqtconsole==4.3.0\nrequests==2.13.0\nrsa==3.4.2\nscandir==1.5\nscipy==0.19.0\nsimplegeneric==0.8.1\nsimplejson==3.10.0\nsingledispatch==3.4.0.3\nsix==1.10.0\nsnowballstemmer==1.2.1\nsounddevice==0.3.7\nSpeechRecognition==3.4.6\nsubprocess32==3.2.7\nsympy==1.0\nterminado==0.6\ntestpath==0.3\ntornado==4.5.1\ntraitlets==4.3.2\nuritemplate==3.0.0\nvine==1.1.3\nwcwidth==0.1.7\nwebencodings==0.5.1\nwidgetsnbextension==2.0.0\nwit==4.2.0\n",
 			"file": "src/requirements.txt",
+			"file_size": 3440,
+			"file_write_time": 131403546140000000,
 			"settings":
 			{
 				"buffer_size": 3440,
@@ -393,7 +432,10 @@
 			}
 		},
 		{
+			"contents": "from .base import *\n\n\ntry:\n\tfrom .local import *\nexcept:\n\tpass\n\n\t\ntry:\n\tfrom .production import *\nexcept:\n\tpass\n\n\n\ntry:\n\tfrom .imac import *\nexcept:\n\tpass\n\ntry:\n\tfrom .macbookpro import *\nexcept:\n\tpass",
 			"file": "src/depressionassesment/settings/__init__.py",
+			"file_size": 201,
+			"file_write_time": 131401292800000000,
 			"settings":
 			{
 				"buffer_size": 201,
@@ -402,7 +444,10 @@
 			}
 		},
 		{
+			"contents": "from django.contrib import admin\n\n# Register your models here.\nfrom .models import Question, Answer,UserAnswer, FreeTextAnswer,UserTextAnswer,Document,UserAudioAnswer\n\nclass AnswerTabularInline(admin.TabularInline):\n\tmodel = Answer\n\n\n\nclass QuestionAdmin(admin.ModelAdmin):\n\tinlines = [AnswerTabularInline]\n\tclass Meta:\n\t\tmodel = Question\n\n# class TestModelAdmin(admin.ModelAdmin):\n\n# \tlist_display = ('audio_file_player',)\n# \tactions = ['custom_delete_selected']\n\n# \tclass Meta:\n# \t\tmodel = TestModel\n\n# \tdef custom_delete_selected(self, request, queryset):\n# \t    #custom delete code\n# \t    n = queryset.count()\n# \t    for i in queryset:\n# \t        if i.audio_file:\n# \t            if os.path.exists(i.audio_file.path):\n# \t                os.remove(i.audio_file.path)\n# \t        i.delete()\n# \t    self.message_user(request, (\"Successfully deleted %d audio files.\") % n)\n# \tcustom_delete_selected.short_description = \"Delete selected items\"\n\n# \tdef get_actions(self, request):\n# \t    actions = super(AudioFileAdmin, self).get_actions(request)\n# \t    del actions['delete_selected']\n# \t    return actions\n\nadmin.site.register(UserTextAnswer)\nadmin.site.register(FreeTextAnswer)\nadmin.site.register(UserAudioAnswer)\nadmin.site.register(Question,QuestionAdmin)\nadmin.site.register(Answer)\nadmin.site.register(UserAnswer)\nadmin.site.register(Document)\n",
 			"file": "src/questions/admin.py",
+			"file_size": 1347,
+			"file_write_time": 131405233660000000,
 			"settings":
 			{
 				"buffer_size": 1347,
@@ -443,15 +488,7 @@
 	},
 	"expanded_folders":
 	[
-		"/Users/ammarkhan/Desktop/seniorproject",
-		"/Users/ammarkhan/Desktop/seniorproject/src",
-		"/Users/ammarkhan/Desktop/seniorproject/src/depressionassesment",
-		"/Users/ammarkhan/Desktop/seniorproject/src/depressionassesment/settings",
-		"/Users/ammarkhan/Desktop/seniorproject/src/questions",
-		"/Users/ammarkhan/Desktop/seniorproject/src/static_in_pro",
-		"/Users/ammarkhan/Desktop/seniorproject/src/templates",
-		"/Users/ammarkhan/Desktop/seniorproject/src/templates/questions",
-		"/Users/ammarkhan/Desktop/seniorproject/webfaction"
+		"/Users/ammarkhan/Desktop/final-code-senior-project"
 	],
 	"file_history":
 	[
@@ -563,7 +600,7 @@
 	"groups":
 	[
 		{
-			"selected": 16,
+			"selected": 17,
 			"sheets":
 			[
 				{
@@ -628,15 +665,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3752,
+						"buffer_size": 4217,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								459,
-								459
+								0,
+								0
 							]
 						],
 						"settings":
@@ -644,10 +681,10 @@
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 2173.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -686,15 +723,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1211,
+						"buffer_size": 1172,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1209,
-								1054
+								0,
+								0
 							]
 						],
 						"settings":
@@ -707,7 +744,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
@@ -832,15 +869,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 14213,
+						"buffer_size": 10220,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5511,
-								5511
+								0,
+								0
 							]
 						],
 						"settings":
@@ -852,7 +889,7 @@
 						"translation.y": 2441.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
@@ -861,28 +898,28 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7546,
+						"buffer_size": 7957,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4776,
-								4776
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/HTML/HTML.sublime-syntax",
-							"tab_size": 4,
+							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 2245.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
@@ -947,15 +984,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3592,
+						"buffer_size": 3658,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								597,
-								597
+								0,
+								0
 							]
 						],
 						"settings":
@@ -967,7 +1004,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -997,7 +1034,7 @@
 						"translation.y": 2051.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -1027,7 +1064,7 @@
 						"translation.y": 2324.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
@@ -1036,15 +1073,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4158,
+						"buffer_size": 4159,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3199,
-								3199
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1054,10 +1091,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2040.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -1073,8 +1110,8 @@
 						"selection":
 						[
 							[
-								3087,
-								3087
+								3177,
+								3177
 							]
 						],
 						"settings":
@@ -1082,10 +1119,10 @@
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1829.0,
+						"translation.y": 1836.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -1141,7 +1178,7 @@
 						"translation.y": 66.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 9,
 					"type": "text"
 				}
 			]
