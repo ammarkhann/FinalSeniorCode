@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+
+
+
+
+
+
+
+
+
+{% block content %}
+
+
+     <!-- Head Section -->
+            <section class="home-section bg-light-alfa-30 parallax-2 fixed-height-small" data-background="{% static 'img/section-bg-56.jpg' %}">
+                <div class="js-height-parent container">
+                    
+                    <!-- Hero Content -->
+                    <div class="home-content">
+                        <div class="home-text">
+                            
+                            <div class="row">
+                        
+                                <div class="col-md-8 align-left">
+                                    <h1 class="hs-line-11 font-alt mb-20 mb-xs-0">WELCOME {{ request.user }}</h1>
+                                    <div class="hs-line-4 font-alt black">
+                                        -It's time to test yourself if you are depressed
+                                    </div>
+                                </div>
+                                
+                               
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <!-- End Hero Content -->
+                    
+                </div>
+            </section>
+            <!-- End Head Section -->
+
+
+
+              <!-- Divider -->
+            <hr class="mt-0 mb-0 "/>
+            <!-- End Divider -->
+            
+            
+       
+
+
+             <!-- Features Section -->
+            <section class="page-section">
+                <div class="container relative">
+                    
+                    <h2 class="section-title font-alt mb-70 mb-sm-40">
+                       TAKE THE TEST OR SEE YOUR SCORE!
+                    </h2>
+                    
+                    <!-- Features Grid -->
+                    <div class="row multi-columns-row alt-features-grid">
+                        
+                        <!-- Features Item -->
+                        <div class="col-sm-6 col-md-4 col-lg-4">
+                            <div class="alt-features-item align-center">
+                                <div class="alt-features-icon">
+                                    <span class="icon-flag"></span>
+                                </div>
+                                <div class="benefit-icon">
+                              <i class="fa fa-question-circle fa-4x" aria-hidden="true"></i>
+                            </div>
+                              <a href='{% url "question_single" id=1 %}'>  <h3 class="alt-features-title font-alt">TAKE TEST</h3></a>
+                                <div class="alt-features-descr align-left">
+                                    Lets get started! Answer a few questions and we will let you know your score
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Features Item -->
+                        
+                        <!-- Features Item -->
+                        <div class="col-sm-6 col-md-4 col-lg-4">
+                           
+                        </div>
+                        <!-- End Features Item -->
+                        
+                        <!-- Features Item -->
+                        <div class="col-sm-6 col-md-4 col-lg-4">
+                            <div class="alt-features-item align-center">
+                                <div class="alt-features-icon">
+                                    <span class="icon-hotairballoon"></span>
+                                </div>
+
+                                 <div class="benefit-icon">
+                               <i class="fa fa-pie-chart fa-4x" aria-hidden="true"></i>
+                            </div>
+                              <a href='{% url "user_result" %}' >  <h3 class="alt-features-title font-alt">SEE YOUR SCORE</h3></a>
+                                <div class="alt-features-descr align-left">
+                                  THE WAIT IS OVER! IT'S TIME TO SEE YOUR SCORE
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Features Item -->
+                        
+                    </div>
+                    <!-- End Features Grid -->
+                        
+                </div>
+            </section>
+            <!-- End Features Section -->
+
+
+           
+            
+
+
+{% endblock %}

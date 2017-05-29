@@ -1,0 +1,68 @@
+{% if button %}
+
+
+{{ abc }}
+
+<form method='get' action='#'>
+    <input type="submit" value="Next" name="Next" id='start'/>
+</form>
+
+
+
+
+<p id='message'>You can download the file in<span id='count'> 10</span> seconds.</p>
+
+
+{% else %}
+
+<p>Fuckkk</p>
+
+{% endif %}
+
+
+ 
+
+<script type="text/javascript">
+	       
+
+{% block jquery %}
+var message = document.getElementById("message");
+var startBtn = document.getElementById("start");
+var count = document.getElementById("count");
+var timer;
+var counter = 50;
+var downloadLink = document.createElement("a");
+// downloadLink.href = "downloadFile.zip";
+// downloadLink.className += "button";
+// downloadLink.innerHTML = "Download the file...";
+
+function startDownload() {
+    this.style.display = 'none';
+    timer = setInterval(function () {
+        counter--;
+        if (counter < 0) {
+            // message.style.display = 'none';
+            // startBtn.parentNode.appendChild(downloadLink);
+            // clearInterval(timer);
+        } else {
+            count.innerHTML = " "+counter.toString();
+        }
+    }, 1000);
+};
+startBtn.onclick = startDownload;
+
+{% endblock %}
+  
+
+
+</script>
+
+
+
+
+
+
+
+
+
+

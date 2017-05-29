@@ -1,0 +1,125 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}">
+     <!--  <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+      <link rel="apple-touch-icon" sizes="72x72" href="{% static 'img/apple-touch-icon-72x72.png' %}">
+      <link rel="apple-touch-icon" sizes="114x114" href="{% static 'img/apple-touch-icon-114x114.png' %}"> -->
+
+    <title>{% block head_title %}Depression Assessment Tool{% endblock %}</title>
+
+    {% include 'head_css.html' %}
+
+      <style>
+
+      .alert-top-message {
+        margin-top: -19px;
+      }
+
+      {% block style %}
+
+      {% endblock %}
+      </style>
+
+
+
+  </head>
+
+  <body>
+  {% include 'navbar.html' %}
+
+  {% if messages %}
+  <div class='alert alert-success alert-top-message'>
+  <div class='container text-center'>
+     {% for message in messages %}
+    {% if "safe" in message.tags %}{{ message|safe }}{% else %}{{ message }} {% endif %}<br/>
+    {% endfor %}
+  </div>
+  </div>
+{% endif %}
+  
+
+
+{% block jumbotron %}
+      
+
+     {% endblock %}
+
+            
+
+          
+            {% block content %}
+
+            {% endblock %}
+              
+
+
+
+            {% block footer %}
+               <!-- Foter -->
+            <footer class="page-section bg-gray-lighter footer pb-60">
+                <div class="container">
+                    
+                    <!-- Footer Logo -->
+                    <div class="local-scroll mb-30 wow fadeInUp" data-wow-duration="1.5s">
+                        <a href="#top"><img src="{% static 'img/logo-dark.png' %}" width="78" height="36" alt="" /></a>
+                    </div>
+                    <!-- End Footer Logo -->
+                    
+                    <!-- Social Links -->
+                    <div class="footer-social-links mb-110 mb-xs-60">
+                        <a href="#" title="Facebook" target="_blank"><i class="fa fa-facebook"></i></a>
+                        <a href="#" title="Twitter" target="_blank"><i class="fa fa-twitter"></i></a>
+                      
+                    </div>
+                    <!-- End Social Links -->  
+                    
+                    <!-- Footer Text -->
+                    <div class="footer-text">
+                        
+                        <!-- Copyright -->
+                        <div class="footer-copy font-alt">
+                            &copy; Ammar Khan.
+                        </div>
+                        <!-- End Copyright -->
+                        
+                     
+                        
+                    </div>
+                    <!-- End Footer Text --> 
+                    
+                 </div>
+                 
+                 
+                 <!-- Top Link -->
+                 <div class="local-scroll">
+                     <a href="#top" class="link-to-top"><i class="fa fa-caret-up"></i></a>
+                 </div>
+                 <!-- End Top Link -->
+                 
+            </footer>
+            <!-- End Foter -->
+
+
+            {% endblock %}
+
+    {% include "javascript.html" %}
+    <script>
+    $(document).ready(function(){
+        {% block jquery %}
+        
+        {% endblock %}
+    });
+    </script>
+    
+  </body>
+</html>

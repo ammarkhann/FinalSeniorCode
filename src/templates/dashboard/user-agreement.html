@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+
+{% block content %}
+
+
+
+
+        <section class="home-section bg-light-alfa-30 parallax-2 fixed-height-small" data-background="{% static 'img/section-bg-56.jpg' %}">
+                <div class="js-height-parent container">
+                    
+                    <!-- Hero Content -->
+                    <div class="home-content">
+                        <div class="home-text">
+                            
+                       <!--      <div class="row">
+                        
+                                <div class="col-md-8 align-left">
+                                    <h1 class="hs-line-11 font-alt mb-20 mb-xs-0">WELCOME {{ request.user }}</h1>
+                                    <div class="hs-line-4 font-alt black">
+                                        -It's time to test yourself if you are depressed
+                                    </div>
+                                </div>
+                                
+                               
+                            </div> -->
+
+                            <h1>TERMS AND CONDITIONS</h1>
+							<ul style="text-align: initial;"> 
+							  <li>This tool is specifically for the purpose of collecting data</li>
+							  <li>The score shown by this tool should not be taken as 100% accurate</li>
+							  <li>No final judgement of a person's depression should be taken by looking at the score provided by this tool.</li>
+							  <li>We will not be responsible for any injury, illness, death, loss (for example loss of enjoyment)</li>
+							  <li>We reserve the right, at its sole discretion, to change, modify, add or remove portions of these Terms, at any time. It is your responsibility to check these Terms and Conditions periodically for changes</li>
+							  <li>By Signing up and taking the test you agree to all of our terms.</li>
+							</ul> 
+                           <a href="{% url 'registration_register' %}">  <h2>CONTINUE TO THE REGISTRATION PAGE</h2></a>
+                        </div>
+                    </div>
+
+
+                    <!-- End Hero Content -->
+                    
+                </div>
+            </section>
+
+
+
+{% endblock %}

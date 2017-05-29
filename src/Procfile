@@ -1,0 +1,1 @@
+web: gunicorn depressionassesment.wsgi --log-file -

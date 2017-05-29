@@ -1,0 +1,155 @@
+
+{% extends 'base.html' %}
+{% block content %}
+
+
+
+ <!-- Head Section -->
+            <section class="small-section bg-gray-lighter">
+                <div class="relative container align-left">
+                    
+                    <div class="row">
+                        
+                        <div class="col-md-8">
+                            <h1 class="hs-line-11 font-alt mb-20 mb-xs-0">Result</h1>
+                            <div class="hs-line-4 font-alt black">
+                                You can view your score below
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mt-30">
+                            <div class="mod-breadcrumbs font-alt align-right">
+                                <a href="{% url 'home' %}">Home</a>&nbsp;/&nbsp;<span>Result</span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+            </section>
+            <!-- End Head Section -->
+            
+            
+            <!-- Section -->
+            <section class="page-section">
+                <div class="container relative">
+                    
+                    <!-- Row -->
+                    <div class="row">
+                        <h1>Hello {{ request.user }} ! You scored a {{ temp_user_score }} %.</h1>
+                        <!-- Col -->
+
+                       
+                        
+                        <div class="col-md-8 col-md-offset-2">
+                            
+                          <div class= 'circle'></div>
+              <!-- End Bar Item -->
+                            
+                        </div>
+                        
+                        <!-- End Col -->  
+                        
+                    </div>
+                    <!-- End Row -->
+                
+                </div>
+            </section>
+            <!-- End Section -->
+            
+            
+            <!-- Divider -->
+            <hr class="mt-0 mb-0 "/>
+            <!-- End Divider -->
+
+
+
+        
+
+ 
+            <!-- Section -->
+            <section class="page-section">
+                <div class="container relative">
+                    
+                    <!-- Row -->
+                    <div class="row">
+                         
+
+                    <h1>Refer to the following table to confirm if you are depressed or not</h1>
+
+                        <!-- Col -->
+                        
+                        <div class="col-md-8 col-md-offset-2">
+                            
+                            <!-- Bar Item -->
+                            <div class="progress tpl-progress-alt">
+                                <div class="progress-bar" role="progressbar" aria-valuenow="49" aria-valuemin="0" aria-valuemax="100" style="background-color: #c33838;">
+                                    DEPRESSED, <span> less than 49% </span>
+                                </div>
+                            </div>
+              <!-- End Bar Item -->
+              
+              <!-- Bar Item -->
+                            <div class="progress tpl-progress-alt">
+                                <div class="progress-bar" role="progressbar" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100" style="background-color: #FFEB3B;">
+                                    MIXED EMOTIONS, <span> 50%-60%</span>
+                                </div>
+                            </div>
+              <!-- End Bar Item -->
+              
+              <!-- Bar Item -->
+                            <div class="progress tpl-progress-alt">
+                                <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="background-color: green;">
+                                    HEALTHY, <span> greater than 60%</span>
+                                </div>
+                            </div>
+              <!-- End Bar Item -->
+              
+              <!-- Bar Item -->
+                          
+              <!-- End Bar Item --> 
+                            
+                        </div>
+                        
+                        <!-- End Col -->                       
+                        
+                    </div>
+                    <!-- End Row -->
+                
+                </div>
+            </section>
+            <!-- End Section -->
+            
+
+
+               
+
+<!-- <div id="circle"></div> -->
+
+
+
+
+
+
+
+
+{% endblock %}
+
+
+
+{% block jquery %}
+
+
+
+   $('.circle').circleProgress({
+    value: {{ temp_user_score}}/100,
+    size: 400,
+    fill: {
+
+      gradient: ["red", "yellow","green"]
+    }
+  });
+
+ 
+
+ {% endblock %}

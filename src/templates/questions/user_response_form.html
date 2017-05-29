@@ -1,0 +1,275 @@
+
+<!-- 
+{% if instance.question_type == 'text_input' %}
+
+<form method='POST' action='{% url "question_single" id=instance.id%}' > {% csrf_token %}
+
+<h1>{{ instance.text }}</h1>
+
+<input type='hidden' name='question_id' value='{{ instance.id }}' />
+
+<h3>Your answer</h3>
+
+   {{ form2.my_answer.errors }}
+	{{ form2.my_answer }}
+
+
+
+
+<input type='submit' value='Save and continue' />
+
+<input type='hidden' name='form1' />
+</form>
+
+
+
+{% else %}
+
+
+<form method='POST' action='{% url "question_single" id=instance.id%}' > {% csrf_token %}
+{{ form.errors }}
+<h1>{{ instance.text }}</h1>
+
+<input type='hidden' name='question_id' value='{{ instance.id }}' />
+
+<h3>Your answer</h3>
+{% for ans in instance.answer_set.all %}
+
+
+<input type='radio' name='answer_id' value='{{ ans.id }}' {% if user_answer.my_answer.id == ans.id %}checked=checked{% endif %} /> {{ ans.text }} <br/>
+
+{% endfor %}
+
+
+
+<! <label for="id_answer_text">Answer text:</label>
+<input id="id_answer_text" name="answer_text" type="text"> -->
+<!-- 
+<br/>
+
+
+
+<input type='submit' value='Save and continue' />
+
+<input type='hidden' name='form1' />
+</form>
+
+
+{% endif %}
+ --> <!-- -->
+
+
+
+
+  
+              <!-- Section -->
+            <section class="page-section">
+                <div class="container relative">
+                    
+                    <div class="row">
+                        
+                        <!-- Content -->
+                        <div class="col-sm-10 col-sm-offset-1">
+                            
+                            <!-- Post -->
+                            <div class="blog-item">
+                                
+                                <!-- Date -->
+                                <div class="blog-item-date">
+                                    <!-- <span class="date-num">05</span>Feb -->
+                                </div>
+                                
+
+                                {% if instance.question_type == 'text_input' %}
+                                <!-- Post Title -->
+                                <h2 class="blog-item-title font-alt">{{instance.text}}</a></h2>
+                                
+                                                        
+                                <!-- Text Intro -->
+                                <div class="blog-item-body">
+                                  
+
+                               <form method='POST' action='{% url "question_single" id=instance.id%}' > {% csrf_token %}
+
+							
+
+									<input type='hidden' name='question_id' value='{{ instance.id }}' />
+
+								<h3>Your answer</h3>
+
+							   {{ form2.my_answer.errors }}
+								{{ form2.my_answer }}
+
+
+								 <div class="mb-10">
+
+                                
+                            </div>
+
+                            
+
+
+							<input type='submit' value='Save and continue'  class="btn btn-mod btn-circle btn-large"/>
+
+							<input type='hidden' name='form1' />
+							</form>
+
+                                </div>
+
+
+
+                                {% elif instance.question_type == 'audio_input' %}
+
+                                     <h2 class="blog-item-title font-alt">{{instance.text}}</a></h2>
+
+
+
+                         
+
+                                    <form method='get' action='#'>
+                                      <!--   <input type="submit" value="Next" name="Next" id='start'/> -->
+
+                                        <td><input type="submit" value="StartRecording" name="_start" id='start'></td>
+                                         <td><input type="submit" value="Submit" name="_submit"></td>
+
+                                    </form>
+                                  <!--   {{ audio_file_path }}
+
+                                        <audio controls>
+                                          
+                                         <source src="{{ path }}" type="audio/flac">
+                                        Your browser does not support the audio element.
+                                        </audio> -->
+                                            {{ user_audio_answer.audio_file }}
+
+                                            {% if user_audio_answer.turkish_speech_to_text %}
+
+                                            <h1>Your Speech Input To Turkish Text:</h1>
+                                           <p> {{ user_audio_answer.turkish_speech_to_text }} </p>
+
+                                           {% else %}
+
+                                           <h2>Start Recording to get your Turkish speech to text input</h2>
+
+                                            {% endif %}
+
+                                             {% if user_audio_answer.translated_english_answer %}
+
+                                                    <h1>Your Translated Turkish Text:</h1>
+                                           <p> {{ user_audio_answer.translated_english_answer }} </p>
+
+                                             {% else %}
+
+                                           <h2>Start Recording to get your Turkish translated speech</h2>
+
+                                            {% endif %}
+
+
+
+
+                                    <p id='message'>Time remaining to record is<span id='count'> 5</span> seconds.</p>
+
+
+    
+
+
+
+                                {% else %}
+
+
+
+
+                                      <!-- Post Title -->
+                                <h2 class="blog-item-title font-alt">{{instance.text}}</a></h2>
+                                
+                                                        
+                                <!-- Text Intro -->
+                                <div class="blog-item-body">
+                                  
+
+                              <form method='POST' action='{% url "question_single" id=instance.id%}' > {% csrf_token %}
+								{{ form.errors }}
+							
+
+								<input type='hidden' name='question_id' value='{{ instance.id }}' />
+
+								<h3>Your answer</h3>
+								{% for ans in instance.answer_set.all %}
+
+
+								<input type='radio' name='answer_id' value='{{ ans.id }}' {% if user_answer.my_answer.id == ans.id %}checked=checked{% endif %} /> {{ ans.text }} <br/>
+
+								{% endfor %}
+
+
+								<br/>
+
+
+
+								<input type='submit' value='Save and continue' class="btn btn-mod btn-circle btn-large" />
+
+								<input type='hidden' name='form1' />
+								</form>
+
+
+
+                                </div>
+                                    
+                           {% endif %}
+                             
+                                
+                            </div>
+                            <!-- End Post -->
+                            
+                           
+                           
+                        
+                       
+                            
+                        
+                            
+                        </div>
+                        <!-- End Content -->
+                        
+                    </div>
+                    
+                </div>
+            </section>
+            <!-- End Section -->
+
+
+
+<script type="text/javascript">
+           
+
+{% block jquery %}
+var message = document.getElementById("message");
+var startBtn = document.getElementById("start");
+var count = document.getElementById("count");
+var timer;
+var counter = 50;
+var downloadLink = document.createElement("a");
+// downloadLink.href = "downloadFile.zip";
+// downloadLink.className += "button";
+// downloadLink.innerHTML = "Download the file...";
+
+function startDownload() {
+    this.style.display = 'none';
+    timer = setInterval(function () {
+        counter--;
+        if (counter < 0) {
+            // message.style.display = 'none';
+            // startBtn.parentNode.appendChild(downloadLink);
+            // clearInterval(timer);
+        } else {
+            count.innerHTML = " "+counter.toString();
+        }
+    }, 1000);
+};
+startBtn.onclick = startDownload;
+
+{% endblock %}
+  
+
+
+</script>
